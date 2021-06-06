@@ -14,6 +14,6 @@ list="https://mensuel.framapad.org/p/********/export/txt" #obtain URL from #oper
 
 curl -sk "$list" -o $tmp
 sed -i.orig 's/^\*//;/^\/\//d;s|/\*|\n&|g;s|*/|&\n|gi;/\/\*/,/*\//d' $tmp
-awk "/^}$/ {f=0} /^link $my_server/ {f=1} /^set {/ {f=1} /^dns rotation/ {f=1} !f;" $tmp | sed ':a;N;$!ba;s/\n\n}\n\n/\n/g;s/\n\n\n*/\n\n/g'  > $file
+awk "/^}$/ {f=0} /^link $my_server/ {f=1} /^set {/ {f=1} /^DNS rotation/ {f=1} /^dns rotation/ {f=1} !f;" $tmp | sed ':a;N;$!ba;s/\n\n}\n\n/\n/g;s/\n\n\n*/\n\n/g'  > $file
 
 $unreal_dir/unrealircd configtest && $unreal_dir/unrealircd rehash
