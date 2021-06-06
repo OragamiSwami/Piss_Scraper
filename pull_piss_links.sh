@@ -6,7 +6,7 @@
 #notes      :Install curl and unrealircd (https://www.unrealircd.org/download)
 #usage      :pull_piss_links.sh
 
-tmp="frampad.tmp"
+tmp=".frampad.tmp"
 file="frampad.conf"
 unreal_dir="/home/ircd/unrealircd/"
 my_server="your.server.tld"
@@ -16,4 +16,6 @@ curl -sk "$list" -o $tmp
 sed -i.orig "s/$(echo -ne '\u200b')//g"';s/^\*//;/^\/\//d;s|/\*|\n&|g;s|*/|&\n|gi;/\/\*/,/*\//d' $tmp
 awk "/^}$/ {f=0} /^link $my_server/ {f=1} /^set {/ {f=1} /^(DNS|dns) rotation/ {f=1} !f;" $tmp | sed ':a;N;$!ba;s/\n\n}\n\n/\n/g;s/\n\n\n*/\n\n/g'  > $file
 
-$unreal_dir/unrealircd configtest && cp $file $file.lng # Last Known Good - Removing auto-rehash due to ..people.. $unreal_dir/unrealircd rehash
+if [ `grep -c hostname $file` -lt 50 ]; then echo "Simple count check failed.. Exiting";cp $file .$file.bad; cp .$file.lng $file; exit; fi # Ensure that we don't attempt to check/rehash a tamperd with pull
+
+$unreal_dir/unrealircd configtest && cp $file .$file.lng || ( cp $file .$file.bad; cp .$file.lng $file ) # Last Known Good - Removing auto-rehash due to ..people.. $unreal_dir/unrealircd rehash
