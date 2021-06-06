@@ -17,3 +17,7 @@ execute the script
 script will preform configtest
 
 and rehash only if successful # temporarily removed to intentional sabotage attempts on the source file; along with some additional checks # can be un-commented to re-enable, but anonymous will be anonymous
+
+Can be automated with crontab entry such as every 5 minutes (ref crontab.guru) with:
+
+*/5 * * * * $pathTo/pull_piss_links.sh &>> /tmp/pull.log
