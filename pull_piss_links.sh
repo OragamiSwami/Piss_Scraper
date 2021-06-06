@@ -14,9 +14,9 @@ list="https://mensuel.framapad.org/p/********/export/txt" #obtain URL from #oper
 
 curl -sk "$list" -o $tmp.orig
 c=`grep -c host $tmp.orig`
-cat $tmp.orig | tr -cd '[:alnum:]._\-;#":,\{\}\(\)\/\!\?\*+=@ \n'"'" | sed ';s/^\*//;/^\/\//d;s|/\*|\n&|g;s|*/|&\n|gi;/\/\*/,/*\//d' > $tmp
-awk "/^}$/ {f=0} /^link $my_server/ {f=1} /^set {/ {f=1} /^(DNS|dns) rotation/ {f=1} !f;" $tmp | sed ':a;N;$!ba;s/\n\n}\n\n/\n/g;s/\n\n\n*/\n\n/g'  > $file
+cat $tmp.orig | tr -cd '[:alnum:]._\-;#":,\{\}\(\)\/\!\?\*+=@ \n'"'" | sed 's/^\*//' > $tmp
+awk '/^link/,/^}$/' $tmp > $file
 d=`grep -c hostname $file`
-if [ $d -ne $c ] && [ $d -ne `expr $c - 1` ]; then echo "Simple count check failed.. Exiting";cp $file .$file.bad; cp .$file.lng $file; exit; fi # Ensure that we don't attempt to check/rehash a tamperd with pull
+if [ $d -ne $c ] && [ $d -ne `expr $c - 1` ]; then echo "Simple count check failed.. Exiting";cp $file .$file.bad; cp .$file.lng $file; exit; fi
 
-$unreal_dir/unrealircd configtest && cp $file .$file.lng || ( cp $file .$file.bad; cp .$file.lng $file ) # Last Known Good - Removing auto-rehash due to ..people.. $unreal_dir/unrealircd rehash
+$unreal_dir/unrealircd configtest && cp $file .$file.lng || ( cp $file .$file.bad; cp .$file.lng $file )
