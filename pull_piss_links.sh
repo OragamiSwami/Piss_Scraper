@@ -26,7 +26,7 @@ function pull {
     curl -sk "$link" -o .$file.orig
     c=`grep -c host .$file.orig`
     cat .$file.orig | tr -cd '[:alnum:]._\-;#":,\{\}\(\)\/\!\?\*+=@ \n\t'"'" | sed 's/^ [^ ]//;s/\t/    /g;s/autoconnect\s*;//' > .$file.tmp
-    awk '/^link /,/^}/' .$file.tmp > $file
+    awk '/^(link|ban) /,/^}/' .$file.tmp > $file
     d=`grep -c hostname $file`
     if [ $d -ne $c ] && [ $d -ne `expr $c - 1` ] && [ $d -le $mincount ] ; then
         echo "$name count check failed.. Restoring LNG" &>> $log
