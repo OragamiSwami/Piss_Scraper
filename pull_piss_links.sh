@@ -38,8 +38,8 @@ function pull {
 
 
 
-pull "Hubs" "$list&section=5" $hubfile 10
-pull "Link" "$list&section=6" $linkfile 70
+pull "Hubs" "$list&section=8" $hubfile 10
+pull "Link" "$list&section=9" $linkfile 70
 pull "Ban" "$banlist" $banfile 2
 
 sed -i 's/class servers;/class hubs;/' $hubfile
