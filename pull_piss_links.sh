@@ -6,22 +6,44 @@
 #notes      :Install curl and unrealircd (https://www.unrealircd.org/download)
 #usage      :pull_piss_links.sh
 
-cd "$(dirname "$0")"
 log="pull.log"
-tmp=".frampad.tmp"
-file="frampad.conf"
+hubfile="hubs.conf"
+linkfile="links.conf"
+banfile="bans.conf"
 unreal_dir="/home/ircd/unrealircd/"
-my_server="your.server.tld"
 list="https://wiki.letspiss.net/index.php?title=Server_link_blocks&action=raw" #obtain URL from #oper topic
 banlist="https://wiki.letspiss.net/index.php?title=Ban_Blocks&action=raw"
 
+
 echo "Start @ `date`" &>> $log
-curl -sk "$list" -o $tmp.orig
-curl -sk "$banlist" >> $tmp.orig
-c=`grep -c host $tmp.orig`
-cat $tmp.orig | tr -cd '[:alnum:]._\-;#":,\{\}\(\)\/\!\?\*+=@ \n\t'"'" | sed 's/^ [^ ]//;s/\t/    /g;s/autoconnect\s*;//' > $tmp
-awk '/^(link|ban) /,/^}/' $tmp > $file
-d=`grep -c hostname $file`
-if [ $d -ne $c ] && [ $d -ne `expr $c - 1` ] && [ $d -le 50 ] ; then echo "Simple count check failed.. Exiting" &>> $log ;cp $file .$file.bad; cp .$file.lng $file; exit; fi
-$unreal_dir/unrealircd configtest &>>$log && ( cp $file .$file.lng && $unreal_dir/unrealircd rehash &>>$log ) || cp $file .$file.bad; cp .$file.lng $file
+
+function pull {
+    name=$1
+    link=$2
+    file=$3
+    mincount=$4
+
+    curl -sk "$link" -o .$file.orig
+    c=`grep -c host .$file.orig`
+    cat .$file.orig | tr -cd '[:alnum:]._\-;#":,\{\}\(\)\/\!\?\*+=@ \n\t'"'" | sed 's/^ [^ ]//;s/\t/    /g;s/autoconnect\s*;//' > .$file.tmp
+    awk '/^link /,/^}/' .$file.tmp > $file
+    d=`grep -c hostname $file`
+    if [ $d -ne $c ] && [ $d -ne `expr $c - 1` ] && [ $d -le $mincount ] ; then
+        echo "$name count check failed.. Restoring LNG" &>> $log
+        cp $file .$file.bad
+        cp .$file.lng $file || ( echo "Failed to restore LNG" &>> $log; return -1)
+    fi
+    $unreal_dir/unrealircd configtest &>>$log && cp $file .$file.lng || ( cp $file .$file.bad; cp .$file.lng $file )
+}
+
+
+
+pull "Hubs" "$list&section=5" $hubfile 10
+pull "Link" "$list&section=6" $linkfile 70
+pull "Ban" "$banlist" $banfile 2
+
+sed -i 's/class servers;/class hubs;/' $hubfile
+
+$unreal_dir/unrealircd configtest &>>$log && $unreal_dir/unrealircd rehash &>>$log
+
 echo -e "End @ `date`\n\n" &>> $log
