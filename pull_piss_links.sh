@@ -6,6 +6,7 @@
 #notes      :Install curl and unrealircd (https://www.unrealircd.org/download)
 #usage      :pull_piss_links.sh
 
+cd "$(dirname "$0")"
 log="pull.log"
 hubfile="hubs.conf"
 linkfile="links.conf"
